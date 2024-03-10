@@ -17,7 +17,8 @@ from transformers import (
 from bigcode_eval.arguments import EvalArguments
 from bigcode_eval.evaluator import Evaluator
 from bigcode_eval.tasks import ALL_TASKS
-
+from bigcode_eval.llama_model import LlamaForCausalLM
+from bigcode_eval.gate_moe import TwoModelGate
 
 class MultiChoice:
     def __init__(self, choices):
@@ -295,7 +296,27 @@ def main():
                 args.model,
                 **model_kwargs,
             )
-        elif args.modeltype == "seq2seq":
+        elif args.modeltype == "gate":
+            warnings.warn(
+                "Seq2Seq models have only been tested for HumanEvalPack & CodeT5+ models."
+            )
+
+            def load_model_tokenizer_for_generate(pretrained_model_name_or_path: str, from_pretrained_kwargs):
+                model = LlamaForCausalLM.from_pretrained(
+                    # pretrained_model_name_or_path, device_map={"": 1}, torch_dtype=torch.bfloat16,)
+                    pretrained_model_name_or_path, low_cpu_mem_usage=True,
+                    trust_remote_code=True, **from_pretrained_kwargs, )
+                return model
+            model_a = f"{args.model}/model_b/"
+            model_b = f"{args.model}/model_a/"
+
+            model_a = load_model_tokenizer_for_generate(model_a, **model_kwargs)
+            model_b = load_model_tokenizer_for_generate(model_b, **model_kwargs)
+            tokenizer = AutoTokenizer.from_pretrained(args.model, padding_side="left")
+            # load the model in device 0
+            model = TwoModelGate(model_a, model_b)
+            model.load_gate_from_pt(args.model)
+        elif args.modeltype == "gate":
             warnings.warn(
                 "Seq2Seq models have only been tested for HumanEvalPack & CodeT5+ models."
             )
