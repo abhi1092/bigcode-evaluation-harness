@@ -304,8 +304,8 @@ def main():
             def load_model_tokenizer_for_generate(pretrained_model_name_or_path: str, from_pretrained_kwargs):
                 model = LlamaForCausalLM.from_pretrained(
                     # pretrained_model_name_or_path, device_map={"": 1}, torch_dtype=torch.bfloat16,)
-                    pretrained_model_name_or_path, low_cpu_mem_usage=True,
-                    trust_remote_code=True, **from_pretrained_kwargs, )
+                    pretrained_model_name_or_path,
+                     **from_pretrained_kwargs, )
                 return model
             model_a = f"{args.model}/model_b/"
             model_b = f"{args.model}/model_a/"
