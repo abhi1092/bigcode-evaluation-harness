@@ -310,9 +310,8 @@ def main():
             model_a = f"{args.model}/model_b/"
             model_b = f"{args.model}/model_a/"
 
-            model_a = load_model_tokenizer_for_generate(model_a, **model_kwargs)
-            model_b = load_model_tokenizer_for_generate(model_b, **model_kwargs)
-            tokenizer = AutoTokenizer.from_pretrained(args.model, padding_side="left")
+            model_a = load_model_tokenizer_for_generate(model_a, model_kwargs)
+            model_b = load_model_tokenizer_for_generate(model_b, model_kwargs)
             # load the model in device 0
             model = TwoModelGate(model_a, model_b)
             model.load_gate_from_pt(args.model)
